@@ -1,0 +1,14 @@
+.git
+.gitignore
+.agents
+.codex
+.env
+.env.*
+!.env.example
+bin
+coverage*
+*.test
+*.out
+*.log
+.idea
+.vscode

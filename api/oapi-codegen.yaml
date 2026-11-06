@@ -1,0 +1,9 @@
+package: generated
+generate:
+  models: true
+  std-http-server: true
+  strict-server: true
+  embedded-spec: true
+compatibility:
+  disable-required-readonly-as-pointer: true
+output: internal/transport/httpapi/generated/api.gen.go
