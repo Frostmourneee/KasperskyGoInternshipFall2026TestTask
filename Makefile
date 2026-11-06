@@ -4,7 +4,7 @@ OAPI_CODEGEN_VERSION := v2.8.2
 SQLC_VERSION := v1.31.1
 
 .DEFAULT_GOAL := build
-.PHONY: generate build run migrate-up migrate-down up down fmt vet test test-integration test-db-up test-db-down
+.PHONY: generate build run migrate-up migrate-down up down fmt vet test test-unit test-integration test-db-up test-db-down
 
 generate:
 	$(GO) run github.com/oapi-codegen/oapi-codegen/v2/cmd/oapi-codegen@$(OAPI_CODEGEN_VERSION) -config api/oapi-codegen.yaml api/openapi.yaml
@@ -35,15 +35,17 @@ fmt:
 vet:
 	$(GO) vet ./...
 
-test:
-	$(GO) test ./...
+test: test-unit
 
-# По умолчанию используется одноразовая БД из compose.test.yaml.
+test-unit:
+	$(GO) test ./tests/unit/...
+
+# По умолчанию используется одноразовая БД из tests/integration/compose.yaml.
 test-integration:
-	TEST_DATABASE_URL="$${TEST_DATABASE_URL:-postgres://test:test@127.0.0.1:15432/threats_test?sslmode=disable}" $(GO) test -count=1 -tags=integration ./internal/storage/postgres/...
+	TEST_DATABASE_URL="$${TEST_DATABASE_URL:-postgres://test:test@127.0.0.1:15432/threats_test?sslmode=disable}" $(GO) test -count=1 -tags=integration ./tests/integration/...
 
 test-db-up:
-	$(COMPOSE) -f compose.test.yaml up -d --wait
+	$(COMPOSE) -f tests/integration/compose.yaml up -d --wait
 
 test-db-down:
-	$(COMPOSE) -f compose.test.yaml down
+	$(COMPOSE) -f tests/integration/compose.yaml down

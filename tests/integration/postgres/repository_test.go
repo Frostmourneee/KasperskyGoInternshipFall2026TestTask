@@ -1,6 +1,6 @@
 //go:build integration
 
-package postgres
+package postgres_test
 
 import (
 	"context"
@@ -16,6 +16,7 @@ import (
 	"github.com/jackc/pgx/v5/stdlib"
 	"github.com/pressly/goose/v3"
 
+	"github.com/Frostmourneee/KasperskyGoInternshipFall2026TestTask/internal/storage/postgres"
 	"github.com/Frostmourneee/KasperskyGoInternshipFall2026TestTask/internal/threat"
 	"github.com/Frostmourneee/KasperskyGoInternshipFall2026TestTask/migrations"
 )
@@ -77,7 +78,7 @@ func TestRepositoryIntegration(t *testing.T) {
 	}
 }
 
-func newTestRepository(t *testing.T) *Repository {
+func newTestRepository(t *testing.T) *postgres.Repository {
 	t.Helper()
 	dsn := os.Getenv("TEST_DATABASE_URL")
 	if dsn == "" {
@@ -122,5 +123,5 @@ func newTestRepository(t *testing.T) *Repository {
 	if _, err := provider.Up(ctx); err != nil {
 		t.Fatalf("apply test migrations: %v", err)
 	}
-	return New(pool)
+	return postgres.New(pool)
 }

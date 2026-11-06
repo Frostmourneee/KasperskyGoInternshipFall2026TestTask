@@ -1,4 +1,4 @@
-package httpapi
+package httpapi_test
 
 import (
 	"context"
@@ -14,6 +14,7 @@ import (
 	"time"
 
 	"github.com/Frostmourneee/KasperskyGoInternshipFall2026TestTask/internal/threat"
+	"github.com/Frostmourneee/KasperskyGoInternshipFall2026TestTask/internal/transport/httpapi"
 )
 
 const testMD5 = "abcdef0123456789abcdef0123456789"
@@ -39,13 +40,13 @@ func (s *stubRepository) Update(ctx context.Context, md5 string, input threat.In
 	return s.Create(ctx, md5, input)
 }
 
-func testHandler(t *testing.T, repo *stubRepository, options ...Options) http.Handler {
+func testHandler(t *testing.T, repo *stubRepository, options ...httpapi.Options) http.Handler {
 	t.Helper()
-	opts := Options{APIKey: "test-key", MaxBodyBytes: 1024, RateLimit: 1000, RateBurst: 100, RequestTimeout: time.Second}
+	opts := httpapi.Options{APIKey: "test-key", MaxBodyBytes: 1024, RateLimit: 1000, RateBurst: 100, RequestTimeout: time.Second}
 	if len(options) > 0 {
 		opts = options[0]
 	}
-	h, err := New(threat.NewService(repo), opts, slog.New(slog.NewTextHandler(io.Discard, nil)))
+	h, err := httpapi.New(threat.NewService(repo), opts, slog.New(slog.NewTextHandler(io.Discard, nil)))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -174,7 +175,7 @@ func TestRepositoryErrors(t *testing.T) {
 }
 
 func TestRateLimit(t *testing.T) {
-	h := testHandler(t, &stubRepository{}, Options{APIKey: "test-key", MaxBodyBytes: 1024, RateLimit: 0.000001, RateBurst: 1, RequestTimeout: time.Second})
+	h := testHandler(t, &stubRepository{}, httpapi.Options{APIKey: "test-key", MaxBodyBytes: 1024, RateLimit: 0.000001, RateBurst: 1, RequestTimeout: time.Second})
 	first := request(h, "GET", "/info/"+testMD5, "", "test-key", "")
 	if first.Code != 200 {
 		t.Fatalf("first status = %d", first.Code)
