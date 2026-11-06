@@ -121,13 +121,24 @@ func requestLifecycle(next http.Handler, timeout time.Duration, logger *slog.Log
 		defer func() {
 			if value := recover(); value != nil {
 				// Текст паники может содержать секреты, поэтому он не журналируется.
-				logger.ErrorContext(ctx, "Request panicked", "method", r.Method, "route", r.Pattern)
+				logger.ErrorContext(ctx, "request panicked", "method", r.Method, "route", r.Pattern)
 				if response.status != 0 {
 					panic(http.ErrAbortHandler)
 				}
 				writeError(response, http.StatusInternalServerError, "Internal server error")
 			}
-			logger.InfoContext(ctx, "Request completed", "method", r.Method, "route", r.Pattern, "status", response.status, "duration_ms", time.Since(started).Milliseconds())
+			status := response.status
+			if status == 0 {
+				status = http.StatusOK
+			}
+			level := slog.LevelInfo
+			if status >= http.StatusInternalServerError {
+				level = slog.LevelError
+			} else if status >= http.StatusBadRequest {
+				level = slog.LevelWarn
+			}
+			// Записываем шаблон маршрута, без заголовков, параметров URL и тела.
+			logger.Log(ctx, level, "request completed", "method", r.Method, "route", r.Pattern, "status", status, "duration_ms", time.Since(started).Milliseconds())
 		}()
 		next.ServeHTTP(response, r)
 	})

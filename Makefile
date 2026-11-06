@@ -4,7 +4,7 @@ OAPI_CODEGEN_VERSION := v2.8.2
 SQLC_VERSION := v1.31.1
 
 .DEFAULT_GOAL := build
-.PHONY: generate build run migrate-up migrate-down up down fmt vet test test-unit test-integration test-db-up test-db-down
+.PHONY: generate build run migrate-up migrate-down up down logs fmt vet test test-unit test-integration test-db-up test-db-down
 
 generate:
 	$(GO) run github.com/oapi-codegen/oapi-codegen/v2/cmd/oapi-codegen@$(OAPI_CODEGEN_VERSION) -config api/oapi-codegen.yaml api/openapi.yaml
@@ -28,6 +28,9 @@ up:
 
 down:
 	$(COMPOSE) down
+
+logs:
+	$(COMPOSE) logs -f api migrate
 
 fmt:
 	$(GO) fmt ./...

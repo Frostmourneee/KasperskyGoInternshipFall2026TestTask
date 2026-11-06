@@ -78,7 +78,7 @@ func New(service *threat.Service, opts Options, logger *slog.Logger) (http.Handl
 	strictHandler := generated.NewStrictHandlerWithOptions(&handler{service: service}, nil, generated.StrictHTTPServerOptions{
 		RequestErrorHandlerFunc: badRequest,
 		ResponseErrorHandlerFunc: func(w http.ResponseWriter, r *http.Request, err error) {
-			logger.ErrorContext(r.Context(), "Request failed", "method", r.Method, "route", r.Pattern, "error", err)
+			logger.ErrorContext(r.Context(), "request failed", "method", r.Method, "route", r.Pattern, "error", err)
 			writeError(w, http.StatusInternalServerError, "Internal server error")
 		},
 	})
